@@ -43,7 +43,7 @@ cp .env.example .env
 ```
 API_ID=12345678           ← вставь свой api_id
 API_HASH=abcdef...        ← вставь свой api_hash
-PHONE_NUMBER=+79991234567 ← номер второго аккаунта
+PHONE_NUMBER=+79991234567 ← номер телефона аккаунта
 ```
 
 ---
