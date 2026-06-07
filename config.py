@@ -45,6 +45,7 @@ CHANNEL_GROUPS = [
         "@sanchez_works",
         "@AbuzikLudit",
         "@cryptosvin",
+	"@nrnkwl4r4lr"
         ],
 
         # ID канала-агрегатора куда пересылать сообщения из этой группы
@@ -70,7 +71,9 @@ CHANNEL_GROUPS = [
         "@theshadeth",
         "@maxshitpostit",
         "@sdgsdfhdfdfh",
-        "@mister_sosister"
+        "@mister_sosister",
+  	"@nrnkwl4r4lr"
+
         ],
 
         "aggregator_id": -1003905453657,

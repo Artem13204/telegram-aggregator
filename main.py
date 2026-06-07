@@ -2,55 +2,67 @@
 # main.py — ГЛАВНЫЙ ФАЙЛ, ЗАПУСКАЙ ЭТОТ
 # =============================================
 
-# Подключаем нужные библиотеки
-import asyncio                          # Позволяет программе делать несколько дел "одновременно"
-import os                               # Работа с файлами и переменными окружения
-from dotenv import load_dotenv          # Читает наш .env файл с секретными данными
-from telethon import TelegramClient, events  # Главная библиотека для работы с Telegram
+import asyncio
+import os
+import logging
+from dotenv import load_dotenv
+from telethon import TelegramClient, events
+from telethon.errors import FloodWaitError
 
-from config import CHANNEL_GROUPS       # Наши группы каналов из config.py
-from forwarder import forward_message   # Наша функция пересылки из forwarder.py
+from config import CHANNEL_GROUPS
+from forwarder import forward_message
 
-# ── Загружаем секретные данные из файла .env ──
+# Настройка логов
+logging.basicConfig(
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
 load_dotenv()
 
-API_ID       = int(os.getenv("API_ID"))    # Числовой ID приложения
-API_HASH     = os.getenv("API_HASH")       # Секретный ключ приложения
-PHONE_NUMBER = os.getenv("PHONE_NUMBER")   # Номер телефона аккаунта
+API_ID       = int(os.getenv("API_ID"))
+API_HASH     = os.getenv("API_HASH")
+PHONE_NUMBER = os.getenv("PHONE_NUMBER")
 
-# ── Главная функция ──
+
 async def main():
-    # Создаём клиент ВНУТРИ async функции — это важно для Python 3.12+
+    # Создаем клиент с повышенной стабильностью
     client = TelegramClient("aggregator_session", API_ID, API_HASH)
 
-    # Запускаем клиент и логинимся
-    await client.start(phone=PHONE_NUMBER)
-    print("✅ Бот запущен и слушает каналы...")
+    # Настройки для уменьшения задержек
+    client.flood_sleep_threshold = 0   # Не ждать автоматически при flood wait
+    client.retry_delay = 1             # Переподключаться через 1 секунду
+    client.auto_reconnect = True       # Автопереподключение при разрыве
 
-    # ── Регистрируем обработчик для каждой группы ──
-    # Проходим по каждой группе из config.py и вешаем свой обработчик
+    await client.start(phone=PHONE_NUMBER)
+
+    # Проверяем соединение
+    me = await client.get_me()
+    logger.info(f"✅ Авторизован как: {me.phone or me.username}")
+
+    # Регистрируем обработчики для каждой группы
     for group in CHANNEL_GROUPS:
         sources       = group["sources"]
         aggregator_id = group["aggregator_id"]
         group_name    = group["name"]
 
-        print(f"📋 Группа [{group_name}]: {len(sources)} каналов → агрегатор {aggregator_id}")
+        logger.info(f"📋 Группа [{group_name}]: {len(sources)} каналов → агрегатор {aggregator_id}")
 
-        # Создаём отдельный обработчик для этой группы.
-        # Важно: используем default argument (g=group) чтобы каждый
-        # обработчик "запомнил" свою группу, а не использовал последнюю из цикла.
         @client.on(events.NewMessage(chats=sources))
         async def handler(event, g=group):
-            await forward_message(client, event, g["aggregator_id"])
+            try:
+                await forward_message(client, event, g["aggregator_id"])
+            except FloodWaitError as e:
+                logger.warning(f"⏳ Flood wait {e.seconds}с — пропускаем")
+                await asyncio.sleep(e.seconds)
+            except Exception as e:
+                logger.error(f"❌ Ошибка: {e}")
 
-    print("Нажми Ctrl+C чтобы остановить\n")
-
-    # ── Держим бота запущенным ──
-    # Программа будет работать пока не нажмёшь Ctrl+C
+    logger.info("🚀 Бот запущен и слушает каналы...\n")
     await client.run_until_disconnected()
 
 
-# ── Точка входа ──
-# Этот блок запускается когда ты пишешь: python main.py
 if __name__ == "__main__":
     asyncio.run(main())
