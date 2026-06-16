@@ -2,6 +2,7 @@
 # forwarder.py — ЛОГИКА ПЕРЕСЫЛКИ СООБЩЕНИЙ
 # =============================================
 
+import datetime, time
 from telethon.tl.types import Message   # Тип "сообщение" из Telethon
 
 
@@ -22,6 +23,11 @@ async def forward_message(client, event, aggregator_channel_id: int):
     source_chat = await event.get_chat()
     source_name = getattr(source_chat, "title", "Неизвестный канал")
 
+    # Замер задержки
+    now_ts = time.time()
+    msg_ts = message.date.timestamp()
+    delay = now_ts - msg_ts
+
     try:
         # ── Пересылаем сообщение ──
         # forward_messages — стандартный форвард, как если бы ты нажал "Переслать" в Telegram.
@@ -33,7 +39,10 @@ async def forward_message(client, event, aggregator_channel_id: int):
         )
 
         # Выводим в консоль что всё прошло хорошо (для отладки)
-        print(f"✅ Переслано из [{source_name}]: {str(message.text or '[медиа]')[:60]}")
+        delay_str = f"{delay:.0f}с"
+        if delay > 60:
+            delay_str = f"{delay/60:.1f}мин"
+        print(f"✅ [{delay_str}] [{source_name}]: {str(message.text or '[медиа]')[:60]}")
 
     except Exception as e:
         # Если что-то пошло не так — показываем ошибку, но НЕ падаем.

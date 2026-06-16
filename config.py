@@ -14,7 +14,7 @@ CHANNEL_GROUPS = [
         "@ArturLudit",
         "@crypto_fl1p",
         "@hotered",
-        "@temkabossa1",
+        # "@temkabossa1",  # удалён/переименован
         "@t2mcrypto",
         "@CryptoMriya",
         "@saunacrypto",
@@ -45,7 +45,15 @@ CHANNEL_GROUPS = [
         "@sanchez_works",
         "@AbuzikLudit",
         "@cryptosvin",
-	"@nrnkwl4r4lr"
+	"@nrnkwl4r4lr",
+        "@moni_talks",
+        "@garlach_crypto",
+        "@unicornweb3",
+        "@Seltiksa",
+        "@TheWolfOfYourStreet",
+        "@VlaDICK_CY",
+        "@bullkaonchainit",
+        "@cryptommrs",
         ],
 
         # ID канала-агрегатора куда пересылать сообщения из этой группы

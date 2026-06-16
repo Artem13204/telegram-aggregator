@@ -1,4 +1,37 @@
-.env
+# Telegram session files
 *.session
 *.session-journal
+*.session-wal
+
+# Environment
+.env
+
+# QR codes / images
+qr_*.png
+qr_url.txt
+qr_status.json
+
+# Debug / one-off scripts (не часть бота)
+auth.py
+auth_sms.py
+bot_debug.py
+bot_v2.py
+bot_v3.py
+check_auth.py
+diagnose.py
+get_url.py
+qr_auth.py
+qr_auth2.py
+qr_auth3.py
+qr_loop.py
+qr_refresh.py
+qr_refresh2.py
+qr_status_auth.py
+qr_wait.py
+qr_wait_long.py
+qr_wait_once.py
+send_code.py
+
+# Python cache
 __pycache__/
+*.pyc
