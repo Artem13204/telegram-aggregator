@@ -76,7 +76,7 @@ CHANNEL_GROUPS = [
         "@digitalbios",
         "@serafimlivestream",
         "@antiaiaiclub",
-        "@theshadeth",
+        # "@theshadeth",  # удалён/переименован
         "@maxshitpostit",
         "@sdgsdfhdfdfh",
         "@mister_sosister",

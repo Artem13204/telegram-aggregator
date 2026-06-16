@@ -64,15 +64,19 @@ async def main():
         group_name    = group["name"]
         logger.info(f"📋 Группа [{group_name}]: {len(sources)} каналов → агрегатор {aggregator_id}")
 
+        # Регистрируем обработчик с try/except для каждого канала отдельно
         @client.on(events.NewMessage(chats=sources))
         async def handler(event, g=group):
             try:
+                source_chat = await event.get_chat()
+                source_name = getattr(source_chat, "title", "Неизвестный")
+                logger.info(f"📩 Получено из [{source_name}] -> группа [{g['name']}]")
                 await forward_message(client, event, g["aggregator_id"])
             except FloodWaitError as e:
                 logger.warning(f"⏳ Flood wait {e.seconds}с — пропускаем")
                 await asyncio.sleep(e.seconds)
             except Exception as e:
-                logger.error(f"❌ Ошибка: {e}")
+                logger.error(f"❌ Ошибка в группе [{g['name']}]: {e}")
 
     logger.info("🚀 Бот запущен и слушает каналы...\n")
     await client.run_until_disconnected()
