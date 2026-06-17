@@ -58,14 +58,26 @@ async def main():
     me = await client.get_me()
     logger.info(f"✅ Авторизован как: {me.phone or me.username}")
 
+    # ── Пре-резолвим все юзернеймы в ID (1 раз при старте) ──
     for group in CHANNEL_GROUPS:
-        sources       = group["sources"]
-        aggregator_id = group["aggregator_id"]
-        group_name    = group["name"]
-        logger.info(f"📋 Группа [{group_name}]: {len(sources)} каналов → агрегатор {aggregator_id}")
+        resolved_sources = []
+        for username in group["sources"]:
+            try:
+                entity = await client.get_input_entity(username)
+                resolved_sources.append(entity)
+            except Exception as e:
+                logger.warning(f"⚠️ Не удалось зарезолвить {username}: {e}")
 
-        # Регистрируем обработчик с try/except для каждого канала отдельно
-        @client.on(events.NewMessage(chats=sources))
+        group["resolved_sources"] = resolved_sources
+        logger.info(f"📋 Группа [{group['name']}]: {len(resolved_sources)}/{len(group['sources'])} каналов → агрегатор {group['aggregator_id']}")
+
+    # ── Регистрируем обработчики ──
+    for group in CHANNEL_GROUPS:
+        if not group["resolved_sources"]:
+            logger.warning(f"⚠️ Пропускаем группу [{group['name']}] — 0 живых каналов")
+            continue
+
+        @client.on(events.NewMessage(chats=group["resolved_sources"]))
         async def handler(event, g=group):
             try:
                 source_chat = await event.get_chat()
@@ -73,8 +85,7 @@ async def main():
                 logger.info(f"📩 Получено из [{source_name}] -> группа [{g['name']}]")
                 await forward_message(client, event, g["aggregator_id"])
             except FloodWaitError as e:
-                logger.warning(f"⏳ Flood wait {e.seconds}с — пропускаем")
-                await asyncio.sleep(e.seconds)
+                logger.warning(f"⏳ Flood wait {e.seconds}с — пропускаем (не ждём)")
             except Exception as e:
                 logger.error(f"❌ Ошибка в группе [{g['name']}]: {e}")
 

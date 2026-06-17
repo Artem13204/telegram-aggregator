@@ -43,7 +43,7 @@ CHANNEL_GROUPS = [
         "@zamokludit",
         "@MamontynokREKT",
         "@sanchez_works",
-        "@AbuzikLudit",
+        # "@AbuzikLudit",  # дубликат
         "@cryptosvin",
 	"@nrnkwl4r4lr",
         "@moni_talks",
