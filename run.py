@@ -35,10 +35,21 @@ API_HASH     = os.getenv("API_HASH")
 PHONE_NUMBER = os.getenv("PHONE_NUMBER")
 
 
+async def keepalive_ping(client):
+    """Пингуем Telegram каждые 30 секунд, чтоб не отваливалось соединение"""
+    while True:
+        await asyncio.sleep(30)
+        try:
+            await client.ping()
+            logger.debug("🏓 Пинг отправлен")
+        except Exception as e:
+            logger.warning(f"⚠️ Пинг упал: {e}")
+
+
 async def main():
     client = TelegramClient("aggregator_session", API_ID, API_HASH)
-    client.flood_sleep_threshold = 0
-    client.retry_delay = 1
+    client.flood_sleep_threshold = 10
+    client.retry_delay = 5
     client.auto_reconnect = True
 
     await client.connect()
@@ -90,6 +101,10 @@ async def main():
                 logger.error(f"❌ Ошибка в группе [{g['name']}]: {e}")
 
     logger.info("🚀 Бот запущен и слушает каналы...\n")
+
+    # Запускаем фоновый пинг для поддержания соединения
+    asyncio.create_task(keepalive_ping(client))
+
     await client.run_until_disconnected()
 
 if __name__ == "__main__":
