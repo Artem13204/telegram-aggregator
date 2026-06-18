@@ -80,7 +80,10 @@ CHANNEL_GROUPS = [
         "@maxshitpostit",
         "@sdgsdfhdfdfh",
         "@mister_sosister",
-  	"@nrnkwl4r4lr"
+        "@nrnkwl4r4lr",
+        "@apple_developer_news",
+        "@ainsales",
+        "@tolyadv_channel",
 
         ],
 
