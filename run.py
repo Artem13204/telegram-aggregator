@@ -6,6 +6,7 @@
 
 import asyncio
 import os
+import sys
 import logging
 from dotenv import load_dotenv
 from telethon import TelegramClient
@@ -16,7 +17,12 @@ from poller import poll_group
 logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%H:%M:%S",
-    level=logging.INFO
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler("logs/aggregator.log"),
+        logging.StreamHandler(sys.stdout)
+    ],
+    force=True
 )
 logger = logging.getLogger(__name__)
 
